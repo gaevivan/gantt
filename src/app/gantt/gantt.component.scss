@@ -1,0 +1,47 @@
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border: 1px solid silver;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+}
+
+// .gantt-container {
+//   overflow-y: auto;
+//   overflow-x: hidden;
+//   position: absolute;
+//   left: -24px;
+//   right: -24px;
+//   top: 0;
+//   bottom: 0;
+// }
+
+// .gantt-scrollable {
+//   min-height: 100%;
+//   width: 100%;
+// }
+
+.gantt-unit-control {
+  display: flex;
+  gap: 8px;
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+}
+
+.gantt-scrollable {
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.gantt-container {
+  min-height: 100%;
+  width: 100%;
+}
