@@ -26,7 +26,7 @@
 .gantt-unit-control {
   display: flex;
   gap: 8px;
-  position: absolute;
+  position: fixed;
   right: 8px;
   bottom: 8px;
 }
@@ -34,14 +34,26 @@
 .gantt-scrollable {
   overflow-y: auto;
   overflow-x: hidden;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
+  min-height: 0;
+  // position: absolute;
+  height: fit-content;
+  max-height: 100%;
+  width: 100%;
 }
 
 .gantt-container {
-  min-height: 100%;
+  // position: relative;
+  height: fit-content;
+  // overflow-y: auto;
+  // overflow-x: hidden;
+  // height: 100%;
+  width: 100%;
+}
+
+.gantt-canvas {
+  // position: absolute;
+  // top: 0;
+  // left: 0;
+  height: 100%;
   width: 100%;
 }

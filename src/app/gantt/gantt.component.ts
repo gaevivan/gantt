@@ -1,13 +1,14 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  ElementRef, Input,
+  ElementRef,
+  Input,
   SimpleChanges,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 import { TimeUnit } from 'chart.js';
 import { Observable, pluck, tap } from 'rxjs';
-import { GanttItem } from './declarations/gantt-item.interface';
+import { GanttItem } from './declarations/interfaces/gantt-item.interface';
 import { GanttBarsService } from './services/gantt-bars.service';
 import { GanttStateService } from './services/gantt-state.service';
 
@@ -19,10 +20,16 @@ import { GanttStateService } from './services/gantt-state.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GanttComponent {
-  @ViewChild('container') public readonly containerRef: ElementRef<HTMLDivElement>;
+  @ViewChild('container')
+  public readonly containerRef: ElementRef<HTMLDivElement>;
   @ViewChild('gantt') public readonly ganttRef: ElementRef<HTMLCanvasElement>;
   @Input() public itemsList: GanttItem[] | null = null;
-  public readonly height$: Observable<number> = this.ganttStateService.size$.pipe(pluck('height'), tap(console.log));
+  @Input() public count: number | null = null;
+  public readonly height$: Observable<number> =
+    this.ganttStateService.size$.pipe(
+      pluck('height'),
+      tap((v) => console.log(v))
+    );
 
   constructor(
     private readonly ganttStateService: GanttStateService,
@@ -39,8 +46,10 @@ export class GanttComponent {
   }
 
   public ngOnChanges(changes: SimpleChanges): void {
+    const count: number | null = changes['count'].currentValue;
     const itemsList: GanttItem[] | null = changes['itemsList'].currentValue;
     this.ganttStateService.setData(itemsList);
+    this.ganttStateService.setCount(count);
     this.ganttBarsService.draw();
   }
 

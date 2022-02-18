@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { GanttTimeLineScale } from './gantt/declarations/classes/time-line-scale.class';
 import { GanttStatus } from './gantt/declarations/enums/gantt-status.enum';
-import { GanttItem } from './gantt/declarations/gantt-item.interface';
+import { GanttItem } from './gantt/declarations/interfaces/gantt-item.interface';
 
 @Component({
   selector: 'app-root',
@@ -9,60 +10,89 @@ import { GanttItem } from './gantt/declarations/gantt-item.interface';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
-  public readonly itemsList: GanttItem[] = [
+  public readonly itemsList: GanttItem[] = new Array(10)
+    .fill(null)
+    .map((date: null, index: number) => {
+      const start: Date = GanttTimeLineScale.daysToDate(index);
+      const end: Date = GanttTimeLineScale.daysToDate(index + index);
+      return {
+        id: String(index),
+        value: [
+          GanttTimeLineScale.dateToDays(start),
+          GanttTimeLineScale.dateToDays(end),
+        ],
+        status: Array.from(Object.values(GanttStatus))[
+          Math.floor(Math.random() * 3)
+        ],
+        start,
+        end,
+      };
+    });
+  /**
+   * [
     {
       id: '0',
-      start: new Date('1995-02-10'),
-      end: new Date('1995-02-20'),
-      status: GanttStatus.Expired
+      start: new Date('2000-01-01'),
+      end: new Date('2001-01-01'),
+      status: GanttStatus.Expired,
+      value: [30, 40],
     },
     {
       id: '1',
-      start: new Date('1995-02-10'),
-      end: new Date('1995-02-14'),
-      status: GanttStatus.Success
+      start: new Date('2001-01-01'),
+      end: new Date('2002-01-01'),
+      status: GanttStatus.Success,
+      value: [40, 50],
     },
     {
       id: '2',
-      start: new Date('1995-02-14'),
-      end: new Date('1995-02-20'),
-      status: GanttStatus.Default
+      start: new Date('2002-01-01'),
+      end: new Date('2003-01-01'),
+      status: GanttStatus.Default,
+      value: [50, 400],
     },
     {
       id: '3',
-      start: new Date('1995-02-20'),
-      end: new Date('1995-02-25'),
-      status: GanttStatus.Default
+      start: new Date('2003-01-01'),
+      end: new Date('2004-01-01'),
+      status: GanttStatus.Default,
+      value: [400, 1000],
     },
     {
       id: '4',
-      start: new Date('1995-02-20'),
-      end: new Date('1995-02-22'),
-      status: GanttStatus.Default
+      start: new Date('2004-01-01'),
+      end: new Date('2006-01-01'),
+      status: GanttStatus.Default,
+      value: [2000, 3000],
     },
     {
       id: '5',
-      start: new Date('1995-02-22'),
-      end: new Date('1995-02-23'),
-      status: GanttStatus.Default
+      start: new Date('2006-01-01'),
+      end: new Date('2010-01-01'),
+      status: GanttStatus.Default,
+      value: [3001, 3002],
     },
     {
       id: '6',
-      start: new Date('1995-02-23'),
-      end: new Date('1995-04-23'),
-      status: GanttStatus.Default
+      start: new Date('2006-01-01'),
+      end: new Date('2010-01-01'),
+      status: GanttStatus.Expired,
+      value: [3003, 3004],
     },
     {
       id: '7',
-      start: new Date('1995-04-23'),
-      end: new Date('1995-06-23'),
-      status: GanttStatus.Expired
+      start: new Date('2010-01-01'),
+      end: new Date('2012-01-01'),
+      status: GanttStatus.Expired,
+      value: [3005, 3006],
     },
     {
       id: '7',
-      start: new Date('1995-06-23'),
-      end: new Date('1995-08-23'),
-      status: GanttStatus.Success
+      start: new Date('2010-01-01'),
+      end: new Date('2012-01-01'),
+      status: GanttStatus.Success,
+      value: [3008, 3009],
     },
-  ]
+  ];
+   */
 }

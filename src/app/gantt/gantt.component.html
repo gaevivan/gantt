@@ -1,11 +1,10 @@
-<div class="gantt-container" #container>
-  <div class="gantt-scrollable" [style.height.px]="height$ | async">
-    <canvas #gantt class="gantt-canvas" (wheel)="onWheel($event)"></canvas>
-  </div>
-  <div class="gantt-unit-control">
-    <button (click)="setTimeUnit('day')">День</button>
-    <button (click)="setTimeUnit('week')">Неделя</button>
-    <button (click)="setTimeUnit('month')">Месяц</button>
-    <button (click)="setTimeUnit('quarter')">Квартал</button>
-  </div>
+<div class="gantt-container" [style.height.px]="height$ | async">
+  <canvas class="gantt-canvas" #gantt (wheel)="onWheel($event)"></canvas>
+</div>
+
+<div class="gantt-unit-control">
+  <button (click)="setTimeUnit('day')">День</button>
+  <button (click)="setTimeUnit('week')">Неделя</button>
+  <button (click)="setTimeUnit('month')">Месяц</button>
+  <button (click)="setTimeUnit('quarter')">Квартал</button>
 </div>
