@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { GanttTimeLineScale } from './gantt/declarations/classes/time-line-scale.class';
+import { GanttDate } from './gantt/declarations/classes/gantt-date.class';
 import { GanttStatus } from './gantt/declarations/enums/gantt-status.enum';
 import { GanttItem } from './gantt/declarations/interfaces/gantt-item.interface';
 
@@ -10,17 +10,14 @@ import { GanttItem } from './gantt/declarations/interfaces/gantt-item.interface'
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
-  public readonly itemsList: GanttItem[] = new Array(10)
+  public readonly itemsList: GanttItem[] = new Array(4)
     .fill(null)
     .map((date: null, index: number) => {
-      const start: Date = GanttTimeLineScale.daysToDate(index);
-      const end: Date = GanttTimeLineScale.daysToDate(index + index);
+      const start: Date = GanttDate.daysToDate(index);
+      const end: Date = GanttDate.daysToDate(index + index);
       return {
         id: String(index),
-        value: [
-          GanttTimeLineScale.dateToDays(start),
-          GanttTimeLineScale.dateToDays(end),
-        ],
+        value: [GanttDate.dateToDays(start), GanttDate.dateToDays(end)],
         status: Array.from(Object.values(GanttStatus))[
           Math.floor(Math.random() * 3)
         ],

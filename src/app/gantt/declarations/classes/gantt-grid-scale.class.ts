@@ -5,9 +5,9 @@ type GanttGridScaleOptions = DeepPartial<LinearScaleOptions> & {
   type: 'linear';
   backgroundColor: string;
 };
-// const DEFAULT_CONFIG: Partial<GanttTimeLineAxisOptions> = ;
+const GRID_LINE_COLOR: string = '#EBEDEE';
 
-export class GanttGridScale extends TimeScale {
+export class GanttGridScale<T = GanttGridScaleOptions> extends TimeScale {
   public static override id: string = 'GanttGridScale';
 
   public static getDefaultOptions(
@@ -17,13 +17,13 @@ export class GanttGridScale extends TimeScale {
       type: 'linear',
       grid: {
         display: true,
+        offset: true,
         drawBorder: false,
         drawOnChartArea: true,
         drawTicks: false,
         lineWidth: 1,
         borderDash: [3, 3],
-        // color: '#EBEDEE',
-        color: 'black',
+        color: GRID_LINE_COLOR,
       },
       bounds: 'ticks',
       position: 'top',
@@ -31,24 +31,19 @@ export class GanttGridScale extends TimeScale {
       max: ticksCount,
       alignToPixels: true,
       ticks: {
+        display: false,
+        maxRotation: 0,
         includeBounds: false,
         autoSkip: true,
         autoSkipPadding: 0,
-        padding: 0,
+        padding: 6,
         callback: (tickValue: number | string) => {
-          return Number(tickValue).toFixed(0);
+          const numberValue: number = Number(Number(tickValue).toFixed(0));
+          return numberValue;
         },
         precision: 0,
         maxTicksLimit: ticksCount * 2,
       },
     };
-  }
-
-  public static dateToDays(date: Date): number {
-    return Math.round(date.getTime() / 1000 / 60 / 60 / 24);
-  }
-
-  public static daysToDate(days: number): Date {
-    return new Date(days * 1000 * 60 * 60 * 24);
   }
 }

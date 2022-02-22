@@ -10,6 +10,7 @@ export namespace GanttModel {
   export type Plugin = ChartJs.Plugin<Type>;
   export type LegendOptions = Partial<ChartJs.LegendOptions<Type>>;
   export type TooltipOptions = Partial<ChartJs.TooltipOptions<Type>>;
+  export type AnimationOptions = DeepPartial<ChartJs.AnimationSpec<Type>>;
   export type Configuration = ChartJs.ChartConfiguration<Type, DataUnit[]>;
   export type Scales = {
     x: DeepPartial<

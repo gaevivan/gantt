@@ -7,10 +7,12 @@ import zoomPlugin from 'chartjs-plugin-zoom';
 import { ZoomPluginOptions } from 'chartjs-plugin-zoom/types/options';
 import { BehaviorSubject, combineLatest, Observable, take } from 'rxjs';
 import { CHART_BACKGROUND_COLOR_PLUGIN } from '../constants/chart-background-color-plugin.const';
+import { DATE_LABELS_PLUGIN } from '../constants/date-labels-plugin.const';
 import { GanttStatusColor } from '../constants/gantt-status-color.const';
-import { GanttGridScale } from '../declarations/classes/grid-scale.class';
-import { GanttTimeLineScale } from '../declarations/classes/time-line-scale.class';
-import { GanttWorksScale } from '../declarations/classes/works-scale.class';
+import { TODAY_LINE_PLUGIN } from '../constants/today-line-plugin.const';
+import { GanttDate } from '../declarations/classes/gantt-date.class';
+import { GanttListScale } from '../declarations/classes/gantt-list-scale.class';
+import { GanttTimeScale } from '../declarations/classes/gantt-time-scale.class';
 import { GanttStatus } from '../declarations/enums/gantt-status.enum';
 import { GanttItem } from '../declarations/interfaces/gantt-item.interface';
 import { GanttSize } from '../declarations/interfaces/gantt-size.interface';
@@ -28,10 +30,13 @@ ChartJs.Chart.register(
   ChartJs.BarController,
   zoomPlugin,
   annotationPlugin,
-  GanttTimeLineScale,
-  GanttWorksScale
+  GanttTimeScale,
+  GanttListScale
 );
 
+const ANIMATION_OPTIONS: GanttModel.AnimationOptions = {
+  duration: 0,
+};
 const TOOLTIP_PLUGIN_OPTIONS: GanttModel.TooltipOptions = {
   enabled: false,
 };
@@ -77,9 +82,7 @@ export class GanttBarsService {
   private ticksList: string[] = new Array(7)
     .fill(new Date())
     .map((date: Date, index: number) =>
-      GanttTimeLineScale.daysToDate(
-        GanttTimeLineScale.dateToDays(date) + index
-      ).toISOString()
+      GanttDate.daysToDate(GanttDate.dateToDays(date) + index).toISOString()
     );
 
   constructor(private readonly ganttStateService: GanttStateService) {}
@@ -99,6 +102,33 @@ export class GanttBarsService {
     // );
   }
 
+  public openToday(): void {
+    this.chart$.pipe(take(1)).subscribe((chart: GanttModel.Chart | null) => {
+      if (chart === null) {
+        return;
+      }
+      // chart.pan(
+      //   {
+      //     x: 0,
+      //     y: 0,
+      //   },
+      //   [chart.scales['x'], chart.scales['y']],
+      //   'reset'
+      // );
+      if (
+        chart.options.scales === undefined ||
+        chart.options.scales['x'] === undefined
+      ) {
+        return;
+      }
+      const xScale: DeepPartial<ChartJs.CartesianScaleOptions> =
+        chart.options.scales['x'];
+      xScale.min = GanttTimeScale.offsetFromToday;
+      xScale.max = 7 + GanttTimeScale.offsetFromToday;
+      chart.update();
+    });
+  }
+
   public draw(): void {
     combineLatest([
       this.count$.pipe(take(1)),
@@ -115,12 +145,13 @@ export class GanttBarsService {
         }
         const data: GanttModel.Data = this.getData(itemsList);
         const type: GanttModel.Type = 'line';
-        const plugins: GanttModel.Plugin[] = [CHART_BACKGROUND_COLOR_PLUGIN];
-        const yScale: DeepPartial<ChartJs.LinearScaleOptions> =
-          GanttGridScale.getDefaultOptions(10);
-        const xScale: DeepPartial<ChartJs.LinearScaleOptions> =
-          GanttGridScale.getDefaultOptions(7);
+        const plugins: GanttModel.Plugin[] = [
+          CHART_BACKGROUND_COLOR_PLUGIN,
+          DATE_LABELS_PLUGIN,
+          TODAY_LINE_PLUGIN,
+        ];
         const options: GanttModel.Options = {
+          animation: ANIMATION_OPTIONS,
           responsive: true,
           maintainAspectRatio: false,
           indexAxis: 'y',
@@ -130,15 +161,8 @@ export class GanttBarsService {
             legend: LEGEND_PLUGIN_OPTIONS,
           },
           scales: {
-            x: xScale,
-            y: {
-              reverse: true,
-              ...yScale,
-              ticks: {
-                ...yScale.ticks,
-                display: false,
-              },
-            },
+            x: GanttTimeScale.getDefaultOptions(7),
+            y: GanttListScale.getDefaultOptions(10),
           },
         };
         const config: GanttModel.Configuration = {
@@ -154,23 +178,29 @@ export class GanttBarsService {
   }
 
   private getData(itemsList: GanttItem[]): GanttModel.Data {
-    const dataList: GanttModel.DataList = [];
+    const dataList: GanttModel.DataList = [
+      [0, 5],
+      [0, 1],
+      [1, 3],
+      [3, 5],
+    ];
     const colorsList: string[] = [];
-    itemsList.forEach((item: GanttItem) => {
-      const colorValue: string =
-        GanttStatusColor[item.status] ?? GanttStatusColor[GanttStatus.Default];
-      const start: number = GanttTimeLineScale.dateToDays(item.start);
-      const end: number = GanttTimeLineScale.dateToDays(item.end);
-      // const dataItem: GanttModel.DataUnit = [
-      //   item.start.toISOString(),
-      //   item.end.toISOString(),
-      // ];
-      // dataList.push(dataItem);
-      dataList.push([start, end]);
-      colorsList.push(colorValue);
-    });
+    // itemsList.forEach((item: GanttItem) => {
+    //   const colorValue: string =
+    //     GanttStatusColor[item.status] ?? GanttStatusColor[GanttStatus.Default];
+    //   const start: number = GanttDate.dateToDays(item.start);
+    //   const end: number = GanttDate.dateToDays(item.end);
+    //   // const dataItem: GanttModel.DataUnit = [
+    //   //   item.start.toISOString(),
+    //   //   item.end.toISOString(),
+    //   // ];
+    //   // dataList.push(dataItem);
+    //   dataList.push([start, end]);
+    //   colorsList.push(colorValue);
+    // });
     console.log({ dataList });
     const dataSet: GanttModel.Dataset = {
+      type: 'line',
       borderWidth: 0,
       backgroundColor: 'red',
       borderColor: 'blue',
@@ -181,9 +211,32 @@ export class GanttBarsService {
       data: dataList,
     };
     // console.log({ data: dataList, ticks: this.ticksList });
+    // const a: ChartJs.ChartDataset<'bar'> = {
+    //   type: 'bar',
+    //   borderRadius: 2,
+    //   categoryPercentage: 1,
+    //   base: 1,
+    //   barThickness: 40,
+    // };
     return {
-      datasets: [dataSet],
-      labels: new Array(7).fill(''),
+      // datasets: [dataSet, dataSet2 as any],
+      datasets: dataList.map((data, index) => {
+        return {
+          type: 'bar',
+          borderWidth: 10,
+          borderColor: 'transparent',
+          borderRadius: 10,
+          barThickness: 60,
+          // barPercentage: 0.9,
+          // base: data,
+          // categoryPercentage: 1,
+          backgroundColor: GanttStatusColor[GanttStatus.Default],
+          data: new Array(dataList.length)
+            .fill(null)
+            .map((v, i) => (i === index ? data : null)),
+        };
+      }) as any,
+      labels: new Array(dataList.length).fill(''),
       // datasets: [dataSet],
       // labels: new Array(10).fill('').map((v, i) => String(i)),
     };

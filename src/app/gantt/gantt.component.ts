@@ -63,4 +63,8 @@ export class GanttComponent {
   public setTimeUnit(timeUnit: TimeUnit): void {
     this.ganttBarsService.setTimeUnit(timeUnit);
   }
+
+  public openToday(): void {
+    this.ganttBarsService.openToday();
+  }
 }
