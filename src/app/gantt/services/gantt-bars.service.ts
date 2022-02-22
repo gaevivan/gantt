@@ -52,6 +52,7 @@ const ZOOM_PLUGIN_OPTIONS: ZoomPluginOptions = {
     // onZoomComplete: ({ chart }: { chart: ChartJs.Chart }) => {
     //   const zoomLevel: number = chart.getZoomLevel();
     // },
+    mode: 'x',
     wheel: {
       modifierKey: 'alt',
       enabled: true,
@@ -179,10 +180,9 @@ export class GanttBarsService {
 
   private getData(itemsList: GanttItem[]): GanttModel.Data {
     const dataList: GanttModel.DataList = [
-      [0, 5],
-      [0, 1],
-      [1, 3],
-      [3, 5],
+      [-1, 3],
+      [-1, 2],
+      [2, 3],
     ];
     const colorsList: string[] = [];
     // itemsList.forEach((item: GanttItem) => {
@@ -198,18 +198,18 @@ export class GanttBarsService {
     //   dataList.push([start, end]);
     //   colorsList.push(colorValue);
     // });
-    console.log({ dataList });
-    const dataSet: GanttModel.Dataset = {
-      type: 'line',
-      borderWidth: 0,
-      backgroundColor: 'red',
-      borderColor: 'blue',
-      // borderSkipped: false,
-      // borderRadius: 2,
-      // backgroundColor: colorsList,
-      // barThickness: this.rowHeightPx - this.paddingSizePx * 2,
-      data: dataList,
-    };
+    // console.log({ dataList });
+    // const dataSet: GanttModel.Dataset = {
+    //   type: 'line',
+    //   borderWidth: 0,
+    //   backgroundColor: 'red',
+    //   borderColor: 'blue',
+    //   // borderSkipped: false,
+    //   // borderRadius: 2,
+    //   // backgroundColor: colorsList,
+    //   // barThickness: this.rowHeightPx - this.paddingSizePx * 2,
+    //   data: dataList,
+    // };
     // console.log({ data: dataList, ticks: this.ticksList });
     // const a: ChartJs.ChartDataset<'bar'> = {
     //   type: 'bar',
@@ -225,12 +225,17 @@ export class GanttBarsService {
           type: 'bar',
           borderWidth: 10,
           borderColor: 'transparent',
-          borderRadius: 10,
+          borderRadius: 14,
           barThickness: 60,
           // barPercentage: 0.9,
           // base: data,
           // categoryPercentage: 1,
-          backgroundColor: GanttStatusColor[GanttStatus.Default],
+          backgroundColor:
+            GanttStatusColor[
+              Array.from(Object.values(GanttStatus))[
+                Math.floor(Math.random() * 3)
+              ]
+            ],
           data: new Array(dataList.length)
             .fill(null)
             .map((v, i) => (i === index ? data : null)),

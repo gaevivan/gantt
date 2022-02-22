@@ -8,7 +8,6 @@ import {
 } from 'rxjs';
 import { GanttItem } from '../declarations/interfaces/gantt-item.interface';
 import { GanttSize } from '../declarations/interfaces/gantt-size.interface';
-import { getIndexOfDayInYear } from '../functions/get-index-of-day-in-year.function';
 
 @Injectable()
 export class GanttStateService {
@@ -58,8 +57,8 @@ export class GanttStateService {
       };
     }
     const heightPx: number = this.rowHeightPx * count + 40;
-    const edgesList: number[] = itemsList.map((item: GanttItem) =>
-      getIndexOfDayInYear(item.end)
+    const edgesList: number[] = itemsList.map(
+      (item: GanttItem) => item.value[1]
     );
     const widthPx: number = Math.max(...edgesList) + this.paddingSizePx * 2;
     return {

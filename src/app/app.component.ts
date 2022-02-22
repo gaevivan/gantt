@@ -13,11 +13,11 @@ export class AppComponent {
   public readonly itemsList: GanttItem[] = new Array(4)
     .fill(null)
     .map((date: null, index: number) => {
-      const start: Date = GanttDate.daysToDate(index);
-      const end: Date = GanttDate.daysToDate(index + index);
+      const start: GanttDate = new GanttDate(-5);
+      const end: GanttDate = new GanttDate(Math.floor(Math.random() * 10));
       return {
         id: String(index),
-        value: [GanttDate.dateToDays(start), GanttDate.dateToDays(end)],
+        value: [start.getDays(), end.getDays()],
         status: Array.from(Object.values(GanttStatus))[
           Math.floor(Math.random() * 3)
         ],
