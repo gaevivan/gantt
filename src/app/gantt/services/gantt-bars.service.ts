@@ -95,10 +95,10 @@ export class GanttBarsService {
           return;
         }
         const max = x.max;
-        if (x.max === undefined) {
+        if (max === undefined) {
           return;
         }
-        x.max = x.max + 49;
+        x.max = max + 49;
         chart.update();
       }
     );
@@ -117,8 +117,8 @@ export class GanttBarsService {
       }
       const xScale: DeepPartial<ChartJs.CartesianScaleOptions> =
         chart.options.scales['x'];
-      xScale.min = GanttTimeScale.offsetFromToday;
-      xScale.max = 7 + GanttTimeScale.offsetFromToday;
+      xScale.min = GanttTimeScale.daysFromToday;
+      xScale.max = 7 + GanttTimeScale.daysFromToday;
       chart.update();
     });
   }

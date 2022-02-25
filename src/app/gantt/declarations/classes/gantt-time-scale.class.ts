@@ -7,7 +7,7 @@ const TRANSPARENT_COLOR: string = 'transparent';
 
 export class GanttTimeScale extends GanttGridScale {
   public static override id: string = 'GanttTimeScale';
-  public static offsetFromToday: number = -2;
+  public static daysFromToday: number = -2;
 
   public static override getDefaultOptions(
     ticksCount: number
@@ -21,15 +21,16 @@ export class GanttTimeScale extends GanttGridScale {
       },
       grid: {
         ...defaultOptions.grid,
-        color: ({ index }: ScriptableScaleContext) => {
-          if (index === 0) {
+        color: ({ scale, tick }: ScriptableScaleContext) => {
+          const xPosition: number = scale.getPixelForValue(tick.value);
+          if (xPosition <= 0) {
             return TRANSPARENT_COLOR;
           }
           return GRID_LINE_COLOR;
         },
       },
-      min: GanttTimeScale.offsetFromToday,
-      max: ticksCount + GanttTimeScale.offsetFromToday,
+      min: GanttTimeScale.daysFromToday,
+      max: ticksCount + GanttTimeScale.daysFromToday,
     };
   }
 }

@@ -22,6 +22,7 @@ export class GanttGridScale<T = GanttGridScaleOptions> extends TimeScale {
         drawTicks: false,
         lineWidth: 1,
         borderDash: [3, 3],
+        color: GRID_LINE_COLOR,
       },
       alignToPixels: true,
       bounds: 'ticks',
@@ -32,7 +33,6 @@ export class GanttGridScale<T = GanttGridScaleOptions> extends TimeScale {
         includeBounds: false,
         autoSkip: true,
         autoSkipPadding: 0,
-        labelOffset: 0,
         callback: (tickValue: number | string) => {
           const numberValue: number = Number(Number(tickValue).toFixed(0));
           return numberValue;

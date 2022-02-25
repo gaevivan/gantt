@@ -24,7 +24,12 @@ export const TIMELINE_LABELS_PLUGIN: Plugin = {
     ctx.textAlign = 'center';
     ctx.strokeStyle = DELIMITER_COLOR;
     ctx.lineWidth = 1;
-    xAxis.ticks.forEach((tickValue: Tick) => drawTick(ctx, xAxis, tickValue));
+    xAxis.ticks.forEach((tick: Tick, index: number) => {
+      if (index === 0) {
+        drawTick(ctx, xAxis, tick.value - 1);
+      }
+      drawTick(ctx, xAxis, Number(tick.value));
+    });
     ctx.stroke();
     ctx.restore();
   },
@@ -33,15 +38,15 @@ export const TIMELINE_LABELS_PLUGIN: Plugin = {
 function drawTick(
   ctx: CanvasRenderingContext2D,
   xAxis: Scale,
-  tickValue: Tick
+  tickValue: number
 ): void {
-  const numberTickValue: number = Number(Number(tickValue.value).toFixed(0));
+  const numberTickValue: number = Number(tickValue.toFixed(0));
   const date: GanttDate = new GanttDate(numberTickValue);
   ctx.font = `bold ${TEXT_SIZE}px Helvetica`;
   ctx.fillStyle = TIME_UNIT_COLOR;
-  const xPos: number = xAxis.getPixelForValue(tickValue.value);
+  const xPos: number = xAxis.getPixelForValue(tickValue);
   const width: number = Math.floor(
-    xPos - xAxis.getPixelForValue(tickValue.value - 1)
+    xPos - xAxis.getPixelForValue(tickValue - 1)
   );
   const yPadding: number = (TIME_LINE_HEIGHT - BORDER_HEIGHT) / 2;
   ctx.moveTo(xPos + width, yPadding);

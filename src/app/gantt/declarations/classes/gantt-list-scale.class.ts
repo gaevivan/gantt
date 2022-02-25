@@ -4,6 +4,7 @@ import { GanttGridScale } from './gantt-grid-scale.class';
 
 const GRID_LINE_COLOR: string = '#EBEDEE';
 const TRANSPARENT_COLOR: string = 'transparent';
+const TIMELINE_HEIGHT: number = 40;
 
 export class GanttListScale extends GanttGridScale {
   public static override id: string = 'GanttListScale';
@@ -17,8 +18,9 @@ export class GanttListScale extends GanttGridScale {
       ...defaultOptions,
       grid: {
         ...defaultOptions.grid,
-        color: ({ tick }: ScriptableScaleContext) => {
-          if (tick.value === 0) {
+        color: ({ tick, scale }: ScriptableScaleContext) => {
+          const yPosition: number = scale.getPixelForValue(tick.value);
+          if (yPosition <= TIMELINE_HEIGHT) {
             return TRANSPARENT_COLOR;
           }
           return GRID_LINE_COLOR;
