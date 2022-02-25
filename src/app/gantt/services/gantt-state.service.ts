@@ -56,7 +56,8 @@ export class GanttStateService {
         width: 0,
       };
     }
-    const heightPx: number = this.rowHeightPx * count + 40;
+    const heightPx: number =
+      this.rowHeightPx * count + 40 + count * (this.paddingSizePx + 1);
     const edgesList: number[] = itemsList.map(
       (item: GanttItem) => item.value[1]
     );

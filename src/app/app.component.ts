@@ -10,14 +10,14 @@ import { GanttItem } from './gantt/declarations/interfaces/gantt-item.interface'
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
-  public readonly itemsList: GanttItem[] = new Array(4)
+  public readonly itemsList: GanttItem[] = new Array(10)
     .fill(null)
     .map((date: null, index: number) => {
-      const start: GanttDate = new GanttDate(-5);
-      const end: GanttDate = new GanttDate(Math.floor(Math.random() * 10));
+      const start: GanttDate = new GanttDate(Math.floor(Math.random() * 3) - 2);
+      const end: GanttDate = new GanttDate(Math.floor(Math.random() * 10) + 3);
       return {
         id: String(index),
-        value: [start.getDays(), end.getDays()],
+        value: [start.getDaysFromToday(), end.getDaysFromToday()],
         status: Array.from(Object.values(GanttStatus))[
           Math.floor(Math.random() * 3)
         ],

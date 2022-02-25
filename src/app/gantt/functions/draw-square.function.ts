@@ -1,5 +1,5 @@
-import { GanttFillRectConfig } from '../declarations/gantt-fill-rect-config.interface';
-import { GanttSquare } from '../declarations/gantt-square.interface';
+import { GanttFillRectConfig } from '../declarations/interfaces/gantt-fill-rect-config.interface';
+import { GanttSquare } from '../declarations/interfaces/gantt-square.interface';
 import { getSquareFromConfig } from './get-square-from-config.function';
 
 export function drawSquare(

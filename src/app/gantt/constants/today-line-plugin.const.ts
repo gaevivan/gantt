@@ -8,6 +8,7 @@ const TEXT_COLOR: string = '#FFFFFF';
 const TEXT_PADDING: number = 4;
 const TOP: number = 1;
 const TEXT_SIZE: number = 10;
+const HOURS_IN_A_DAY: number = 24;
 
 export const TODAY_LINE_PLUGIN: Plugin = {
   id: 'TODAY_LINE_PLUGIN',
@@ -18,46 +19,46 @@ export const TODAY_LINE_PLUGIN: Plugin = {
     }
     const yAxis: Scale = chart.scales['y'];
     const xAxis: Scale = chart.scales['x'];
-    const xValue: number = xAxis.getPixelForValue(0);
+    const time: number = new Date().getHours();
+    const xPositionPx: number = xAxis.getPixelForValue(
+      0 + time / HOURS_IN_A_DAY
+    );
     ctx.beginPath();
-    ctx.moveTo(xValue, 0);
-    drawLine(ctx, xAxis, yAxis);
-    drawChip(ctx, xAxis);
-    drawText(ctx, xAxis);
+    ctx.moveTo(xPositionPx, 0);
+    drawLine(ctx, yAxis, xPositionPx);
+    drawChip(ctx, xPositionPx);
+    drawText(ctx, xPositionPx);
   },
 };
 
 function drawLine(
   ctx: CanvasRenderingContext2D,
-  xAxis: Scale,
-  yAxis: Scale
+  yAxis: Scale,
+  xPositionPx: number
 ): void {
-  const xValue: number = xAxis.getPixelForValue(0);
   ctx.strokeStyle = LINE_COLOR;
   ctx.lineWidth = 1.5;
-  ctx.lineTo(xValue, yAxis.bottom);
+  ctx.lineTo(xPositionPx, yAxis.bottom);
   ctx.stroke();
 }
 
-function drawChip(ctx: CanvasRenderingContext2D, xAxis: Scale): void {
-  const xValue: number = xAxis.getPixelForValue(0);
+function drawChip(ctx: CanvasRenderingContext2D, xPositionPx: number): void {
   const todayText: string = new GanttDate().getTodayLineText();
   const textWidth: number = ctx.measureText(todayText).width + TEXT_PADDING * 2;
   ctx.fillStyle = BACKGROUND_COLOR;
   ctx.fillRect(
-    xValue - textWidth / 2,
+    xPositionPx - textWidth / 2,
     0,
     textWidth,
     TEXT_HEIGHT + TEXT_PADDING * 2
   );
 }
 
-function drawText(ctx: CanvasRenderingContext2D, xAxis: Scale): void {
-  const xValue: number = xAxis.getPixelForValue(0);
+function drawText(ctx: CanvasRenderingContext2D, xPositionPx: number): void {
   const todayText: string = new GanttDate().getTodayLineText();
   ctx.textBaseline = 'top';
   ctx.font = `normal ${TEXT_SIZE}px`;
   ctx.fillStyle = TEXT_COLOR;
   ctx.textAlign = 'center';
-  ctx.fillText(todayText, xValue, TOP + TEXT_PADDING);
+  ctx.fillText(todayText, xPositionPx, TOP + TEXT_PADDING);
 }

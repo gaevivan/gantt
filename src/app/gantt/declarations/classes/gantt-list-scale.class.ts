@@ -11,19 +11,9 @@ export class GanttListScale extends GanttGridScale {
       GanttGridScale.getDefaultOptions(ticksCount);
     return {
       ...defaultOptions,
-      grid: {
-        ...defaultOptions.grid,
-        offset: true,
-      },
-
-      min: -2,
-      max: ticksCount - 2,
+      min: 0,
+      max: ticksCount,
       reverse: true,
-      offset: false,
-      ticks: {
-        ...defaultOptions.ticks,
-        display: false,
-      },
     };
   }
 }

@@ -2,9 +2,9 @@ import * as ChartJs from 'chart.js';
 import { DeepPartial } from 'chart.js/types/utils';
 
 export namespace GanttModel {
-  export type DataUnit = [number, number];
+  export type DataUnit = [number, number] | null;
   export type DataList = DataUnit[];
-  export type Type = 'line';
+  export type Type = 'line' | 'bar';
   export type Dataset = ChartJs.ChartDataset<Type, DataUnit[]>;
   export type Data = ChartJs.ChartData<Type, DataUnit[]>;
   export type Plugin = ChartJs.Plugin<Type>;
