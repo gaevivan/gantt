@@ -17,7 +17,6 @@ export const TODAY_LINE_PLUGIN: Plugin = {
     if (ctx === null) {
       return;
     }
-    const yAxis: Scale = chart.scales['y'];
     const xAxis: Scale = chart.scales['x'];
     const time: number = new Date().getHours();
     const xPositionPx: number = xAxis.getPixelForValue(
@@ -25,7 +24,7 @@ export const TODAY_LINE_PLUGIN: Plugin = {
     );
     ctx.beginPath();
     ctx.moveTo(xPositionPx, 0);
-    drawLine(ctx, yAxis, xPositionPx);
+    drawLine(ctx, xPositionPx, chart);
     drawChip(ctx, xPositionPx);
     drawText(ctx, xPositionPx);
   },
@@ -33,12 +32,12 @@ export const TODAY_LINE_PLUGIN: Plugin = {
 
 function drawLine(
   ctx: CanvasRenderingContext2D,
-  yAxis: Scale,
-  xPositionPx: number
+  xPositionPx: number,
+  chart: Chart
 ): void {
   ctx.strokeStyle = LINE_COLOR;
   ctx.lineWidth = 1.5;
-  ctx.lineTo(xPositionPx, yAxis.bottom);
+  ctx.lineTo(xPositionPx, chart.height);
   ctx.stroke();
 }
 
