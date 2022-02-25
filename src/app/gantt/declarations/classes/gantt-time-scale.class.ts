@@ -1,7 +1,9 @@
+import { ScriptableScaleContext } from 'chart.js';
 import { GanttGridScaleOptions } from '../types/gantt-grid-scale-options.type';
 import { GanttGridScale } from './gantt-grid-scale.class';
 
-const DEFAULT_BACKGROUND_COLOR: string = 'white';
+const GRID_LINE_COLOR: string = '#EBEDEE';
+const TRANSPARENT_COLOR: string = 'transparent';
 
 export class GanttTimeScale extends GanttGridScale {
   public static override id: string = 'GanttTimeScale';
@@ -17,13 +19,17 @@ export class GanttTimeScale extends GanttGridScale {
       afterFit: (scale) => {
         scale.height = 40;
       },
-      min: GanttTimeScale.offsetFromToday,
-      max: ticksCount + GanttTimeScale.offsetFromToday,
       grid: {
         ...defaultOptions.grid,
-        // offset: false,
+        color: ({ index }: ScriptableScaleContext) => {
+          if (index === 0) {
+            return TRANSPARENT_COLOR;
+          }
+          return GRID_LINE_COLOR;
+        },
       },
-      backgroundColor: DEFAULT_BACKGROUND_COLOR,
+      min: GanttTimeScale.offsetFromToday,
+      max: ticksCount + GanttTimeScale.offsetFromToday,
     };
   }
 }

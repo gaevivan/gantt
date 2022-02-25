@@ -7,7 +7,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { TimeUnit } from 'chart.js';
-import { Observable, pluck, tap } from 'rxjs';
+import { Observable, pluck } from 'rxjs';
 import { GanttItem } from './declarations/interfaces/gantt-item.interface';
 import { GanttBarsService } from './services/gantt-bars.service';
 import { GanttStateService } from './services/gantt-state.service';
@@ -26,10 +26,7 @@ export class GanttComponent {
   @Input() public itemsList: GanttItem[] | null = null;
   @Input() public count: number | null = null;
   public readonly height$: Observable<number> =
-    this.ganttStateService.size$.pipe(
-      pluck('height'),
-      tap((v) => console.log(v))
-    );
+    this.ganttStateService.size$.pipe(pluck('height'));
 
   constructor(
     private readonly ganttStateService: GanttStateService,

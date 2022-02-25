@@ -3,9 +3,9 @@ import { DeepPartial } from 'chart.js/types/utils';
 
 type GanttGridScaleOptions = DeepPartial<LinearScaleOptions> & {
   type: 'linear';
-  backgroundColor: string;
 };
 const GRID_LINE_COLOR: string = '#EBEDEE';
+const TRANSPARENT_COLOR: string = 'transparent';
 
 export class GanttGridScale<T = GanttGridScaleOptions> extends TimeScale {
   public static override id: string = 'GanttGridScale';
@@ -22,7 +22,6 @@ export class GanttGridScale<T = GanttGridScaleOptions> extends TimeScale {
         drawTicks: false,
         lineWidth: 1,
         borderDash: [3, 3],
-        color: GRID_LINE_COLOR,
       },
       alignToPixels: true,
       bounds: 'ticks',

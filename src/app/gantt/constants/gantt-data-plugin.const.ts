@@ -1,6 +1,7 @@
 import { Chart, Plugin, Scale, Tick } from 'chart.js';
 import { GanttDate } from '../declarations/classes/gantt-date.class';
 import { GanttStatus } from '../declarations/enums/gantt-status.enum';
+import { GanttModel } from '../declarations/namespaces/gantt.namespace';
 import { drawSquare } from '../functions/draw-square.function';
 import { GanttStatusColor } from './gantt-status-color.const';
 
@@ -24,19 +25,15 @@ export const GANTT_DATA_PLUGIN: Plugin = {
     if (ctx === null) {
       return;
     }
-    const xAxis = chart.scales['x'];
-    const yAxis = chart.scales['y'];
-    const dataset = chart.data.datasets[0];
-    const data: [number, number][] = dataset.data as any;
-    console.log(data);
-    // const
-    // ctx.save();
-    // ctx.beginPath();
-    // // ctx.textBaseline = 'top';
-    // // ctx.textAlign = 'center';
-    // // ctx.strokeStyle = DELIMITER_COLOR;
-    // // ctx.lineWidth = 1;
-    data.forEach((dataItem, index) => {
+    const xAxis: Scale = chart.scales['x'];
+    const yAxis: Scale = chart.scales['y'];
+    const dataset: GanttModel.Dataset = chart.data
+      .datasets[0] as GanttModel.Dataset;
+    const data: GanttModel.DataList = dataset.data as GanttModel.DataList;
+    data.forEach((dataItem: GanttModel.DataUnit | null, index: number) => {
+      if (dataItem === null) {
+        return;
+      }
       const xStartPos: number = xAxis.getPixelForValue(dataItem[0]);
       const xEndPos: number = xAxis.getPixelForValue(dataItem[1]);
       const yPos: number = yAxis.getPixelForValue(index);

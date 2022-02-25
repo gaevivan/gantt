@@ -7,16 +7,14 @@ import zoomPlugin from 'chartjs-plugin-zoom';
 import { ZoomPluginOptions } from 'chartjs-plugin-zoom/types/options';
 import { BehaviorSubject, combineLatest, Observable, take } from 'rxjs';
 import { CHART_BACKGROUND_COLOR_PLUGIN } from '../constants/chart-background-color-plugin.const';
-import { DATE_LABELS_PLUGIN } from '../constants/date-labels-plugin.const';
 import { GANTT_DATA_PLUGIN } from '../constants/gantt-data-plugin.const';
 import { GanttStatusColor } from '../constants/gantt-status-color.const';
+import { TIMELINE_LABELS_PLUGIN } from '../constants/timeline-labels-plugin.const';
 import { TODAY_LINE_PLUGIN } from '../constants/today-line-plugin.const';
-import { GanttDate } from '../declarations/classes/gantt-date.class';
 import { GanttListScale } from '../declarations/classes/gantt-list-scale.class';
 import { GanttTimeScale } from '../declarations/classes/gantt-time-scale.class';
 import { GanttStatus } from '../declarations/enums/gantt-status.enum';
 import { GanttItem } from '../declarations/interfaces/gantt-item.interface';
-import { GanttSize } from '../declarations/interfaces/gantt-size.interface';
 import { GanttModel } from '../declarations/namespaces/gantt.namespace';
 import { GanttStateService } from './gantt-state.service';
 
@@ -73,19 +71,9 @@ export class GanttBarsService {
     this.ganttStateService.count$;
   private readonly canvas$: Observable<CanvasRenderingContext2D> =
     this.ganttStateService.canvas$;
-  private readonly rowHeightPx: number = this.ganttStateService.rowHeightPx;
-  private readonly paddingSizePx: number = this.ganttStateService.paddingSizePx;
-  private readonly size$: Observable<GanttSize> = this.ganttStateService.size$;
   private readonly chart$: BehaviorSubject<GanttModel.Chart | null> =
     new BehaviorSubject<GanttModel.Chart | null>(null);
-  private readonly type$: BehaviorSubject<ChartJs.TimeUnit> =
-    new BehaviorSubject<ChartJs.TimeUnit>('day');
   private currentTimeUnit: ChartJs.TimeUnit = 'day';
-  private ticksList: string[] = new Array(7)
-    .fill(new Date())
-    .map((date: Date, index: number) =>
-      GanttDate.daysToDate(GanttDate.dateToDays(date) + index).toISOString()
-    );
 
   constructor(private readonly ganttStateService: GanttStateService) {}
 
@@ -98,8 +86,6 @@ export class GanttBarsService {
         if (chart === null) {
           return;
         }
-        // this.currentTimeUnit = timeUnit;
-        // chart.zoom(0.001, 'zoom');
         const scales = chart.options.scales;
         if (scales === undefined) {
           return;
@@ -112,9 +98,7 @@ export class GanttBarsService {
         if (x.max === undefined) {
           return;
         }
-        console.log(x.max);
         x.max = x.max + 49;
-        // chart.options.scales['x'] = chart.scales['x'].max * 7;
         chart.update();
       }
     );
@@ -125,14 +109,6 @@ export class GanttBarsService {
       if (chart === null) {
         return;
       }
-      // chart.pan(
-      //   {
-      //     x: 0,
-      //     y: 0,
-      //   },
-      //   [chart.scales['x'], chart.scales['y']],
-      //   'reset'
-      // );
       if (
         chart.options.scales === undefined ||
         chart.options.scales['x'] === undefined
@@ -166,7 +142,7 @@ export class GanttBarsService {
         const plugins: GanttModel.Plugin[] = [
           CHART_BACKGROUND_COLOR_PLUGIN,
           GANTT_DATA_PLUGIN,
-          DATE_LABELS_PLUGIN,
+          TIMELINE_LABELS_PLUGIN,
           TODAY_LINE_PLUGIN,
         ];
         const options: GanttModel.Options = {
@@ -201,11 +177,6 @@ export class GanttBarsService {
     itemsList.forEach((item: GanttItem) => {
       const colorValue: string =
         GanttStatusColor[item.status] ?? GanttStatusColor[GanttStatus.Default];
-      // const dataItem: GanttModel.DataUnit = [
-      //   item.start.toISOString(),
-      //   item.end.toISOString(),
-      // ];
-      // dataList.push(dataItem);
       dataList.push(item.value);
     });
     // const datasetList: ChartJs.ChartDataset<'bar', GanttModel.DataUnit[]>[] =

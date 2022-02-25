@@ -10,7 +10,7 @@ const TIME_LINE_HEIGHT: number = 40;
 const BORDER_HEIGHT: number = 16;
 const DELIMITER_COLOR: string = 'rgba(0,0,0,0.1)';
 
-export const DATE_LABELS_PLUGIN: Plugin = {
+export const TIMELINE_LABELS_PLUGIN: Plugin = {
   id: 'DATE_LABELS_PLUGIN',
   afterDraw: (chart: Chart) => {
     const ctx = chart.canvas.getContext('2d');
