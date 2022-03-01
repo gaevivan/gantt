@@ -13,9 +13,6 @@ export class GanttGridScale<T = GanttGridScaleOptions> extends LinearScale {
   ): Partial<GanttGridScaleOptions> {
     return {
       type: 'GanttGridScale',
-      afterFit: (scale: GanttGridScale) => {
-        scale.height = 40;
-      },
       grid: {
         display: true,
         drawBorder: false,
@@ -39,7 +36,7 @@ export class GanttGridScale<T = GanttGridScaleOptions> extends LinearScale {
           const numberValue: number = Number(tickValue);
           return numberValue;
         },
-        maxTicksLimit: ticksCount + 3,
+        maxTicksLimit: ticksCount,
       },
     };
   }

@@ -1,16 +1,15 @@
 import { Chart, Plugin, Tick } from 'chart.js';
 import { GanttDate } from '../declarations/classes/gantt-date.class';
 import { GanttTimeScale } from '../declarations/classes/gantt-time-scale.class';
+import { GanttConfiguration } from '../declarations/namespaces/gantt-configuration.namespace';
 
 const TEXT_HEIGHT: number = 10;
 const TIME_UNIT_COLOR: string = '#1D1C36';
 const YEAR_COLOR: string = '#3D5159';
 const TEXT_PADDING: number = 4;
 const TEXT_SIZE: number = 10;
-const TIME_LINE_HEIGHT: number = 40;
 const BORDER_HEIGHT: number = 16;
 const DELIMITER_COLOR: string = 'rgba(0,0,0,0.1)';
-const ITEM_WIDTH: number = 155;
 
 export const TIMELINE_LABELS_PLUGIN: Plugin = {
   id: 'DATE_LABELS_PLUGIN',
@@ -62,11 +61,13 @@ function drawTick(
   const tickWidth: number = isLastTick
     ? tickLeftPosition - prevTickLeftPosition
     : nextTickLeftPosition - tickLeftPosition;
-  const yPadding: number = (TIME_LINE_HEIGHT - BORDER_HEIGHT) / 2;
+  const yPadding: number =
+    (GanttConfiguration.TIMELINE_HEIGHT_PX - BORDER_HEIGHT) / 2;
   ctx.moveTo(tickLeftPosition + tickWidth, yPadding);
   ctx.lineTo(tickLeftPosition + tickWidth, yPadding + BORDER_HEIGHT);
   if (tickYearLabel === tickDateLabel) {
-    const yearPadding: number = (TIME_LINE_HEIGHT - TEXT_HEIGHT) / 2;
+    const yearPadding: number =
+      (GanttConfiguration.TIMELINE_HEIGHT_PX - TEXT_HEIGHT) / 2;
     ctx.fillText(tickDateLabel, tickLeftPosition + tickWidth / 2, yearPadding);
     return;
   }

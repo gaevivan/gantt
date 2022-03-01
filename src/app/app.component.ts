@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { GanttStatus } from './gantt/declarations/enums/gantt-status.enum';
-import { GanttItem } from './gantt/declarations/interfaces/gantt-item.interface';
+import { GanttModel } from './gantt/declarations/namespaces/gantt.namespace';
 
 @Component({
   selector: 'app-root',
@@ -24,7 +24,7 @@ export class AppComponent {
   //       end,
   //     };
   //   });
-  public readonly itemsList: GanttItem[] = [
+  public readonly itemsList: GanttModel.InputDataItem[] = [
     {
       id: '1',
       value: [0, 1],
@@ -38,12 +38,12 @@ export class AppComponent {
     {
       id: '3',
       value: [9, 38],
-      status: GanttStatus.Default,
+      status: GanttStatus.Success,
     },
     {
       id: '4',
       value: [39, 128],
-      status: GanttStatus.Default,
+      status: GanttStatus.Expired,
     },
     {
       id: '4',

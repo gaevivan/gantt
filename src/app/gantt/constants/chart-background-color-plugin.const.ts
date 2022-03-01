@@ -1,7 +1,5 @@
 import { Chart, Plugin } from 'chart.js';
-
-const CHART_BACKGROUND_COLOR: string = '#F5F6F7';
-const TIMELINE_BACKGROUND_COLOR: string = '#FFFFFF';
+import { GanttConfiguration } from '../declarations/namespaces/gantt-configuration.namespace';
 
 export const CHART_BACKGROUND_COLOR_PLUGIN: Plugin = {
   id: 'CHART_BACKGROUND_COLOR_PLUGIN',
@@ -11,10 +9,10 @@ export const CHART_BACKGROUND_COLOR_PLUGIN: Plugin = {
       return;
     }
     ctx.save();
-    ctx.fillStyle = CHART_BACKGROUND_COLOR;
+    ctx.fillStyle = GanttConfiguration.CHART_BACKGROUND_COLOR;
     ctx.fillRect(0, 0, chart.width, chart.height);
-    ctx.fillStyle = TIMELINE_BACKGROUND_COLOR;
-    ctx.fillRect(0, 0, chart.width, 40);
+    ctx.fillStyle = GanttConfiguration.TIMELINE_BACKGROUND_COLOR;
+    ctx.fillRect(0, 0, chart.width, GanttConfiguration.TIMELINE_HEIGHT_PX);
     ctx.restore();
   },
 };

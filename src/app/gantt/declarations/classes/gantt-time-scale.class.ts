@@ -19,6 +19,10 @@ export class GanttTimeScale extends GanttGridScale {
     return {
       ...defaultOptions,
       type: 'GanttTimeScale',
+      afterFit: (scale: GanttGridScale) => {
+        scale.height = GanttConfiguration.TIMELINE_HEIGHT_PX;
+        // console.log(scale.top);
+      },
       grid: {
         ...defaultOptions.grid,
         color: ({ scale, tick }: ScriptableScaleContext) => {

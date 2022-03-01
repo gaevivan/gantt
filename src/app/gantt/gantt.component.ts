@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { TimeUnit } from 'chart.js';
 import { Observable, pluck } from 'rxjs';
-import { GanttItem } from './declarations/interfaces/gantt-item.interface';
+import { GanttModel } from './declarations/namespaces/gantt.namespace';
 import { GanttBarsService } from './services/gantt-bars.service';
 import { GanttStateService } from './services/gantt-state.service';
 
@@ -23,7 +23,7 @@ export class GanttComponent {
   @ViewChild('container')
   public readonly containerRef: ElementRef<HTMLDivElement>;
   @ViewChild('gantt') public readonly ganttRef: ElementRef<HTMLCanvasElement>;
-  @Input() public itemsList: GanttItem[] | null = null;
+  @Input() public itemsList: GanttModel.InputDataItem[] | null = null;
   @Input() public count: number | null = null;
   public readonly height$: Observable<number> =
     this.ganttStateService.size$.pipe(pluck('height'));
@@ -44,7 +44,8 @@ export class GanttComponent {
 
   public ngOnChanges(changes: SimpleChanges): void {
     const count: number | null = changes['count'].currentValue;
-    const itemsList: GanttItem[] | null = changes['itemsList'].currentValue;
+    const itemsList: GanttModel.InputDataItem[] | null =
+      changes['itemsList'].currentValue;
     this.ganttStateService.setData(itemsList);
     this.ganttStateService.setCount(count);
     this.ganttBarsService.draw();

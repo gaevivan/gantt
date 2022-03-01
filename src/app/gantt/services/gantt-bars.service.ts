@@ -7,15 +7,12 @@ import zoomPlugin from 'chartjs-plugin-zoom';
 import { ZoomPluginOptions } from 'chartjs-plugin-zoom/types/options';
 import { BehaviorSubject, combineLatest, Observable, take } from 'rxjs';
 import { CHART_BACKGROUND_COLOR_PLUGIN } from '../constants/chart-background-color-plugin.const';
-import { GANTT_DATA_PLUGIN } from '../constants/gantt-data-plugin.const';
 import { GanttStatusColor } from '../constants/gantt-status-color.const';
 import { TIMELINE_LABELS_PLUGIN } from '../constants/timeline-labels-plugin.const';
 import { TODAY_LINE_PLUGIN } from '../constants/today-line-plugin.const';
 import { GanttDate } from '../declarations/classes/gantt-date.class';
 import { GanttListScale } from '../declarations/classes/gantt-list-scale.class';
 import { GanttTimeScale } from '../declarations/classes/gantt-time-scale.class';
-import { GanttStatus } from '../declarations/enums/gantt-status.enum';
-import { GanttItem } from '../declarations/interfaces/gantt-item.interface';
 import { GanttConfiguration } from '../declarations/namespaces/gantt-configuration.namespace';
 import { GanttUtilities } from '../declarations/namespaces/gantt-utilities.namespace';
 import { GanttModel } from '../declarations/namespaces/gantt.namespace';
@@ -127,7 +124,7 @@ const ZOOM_PLUGIN_OPTIONS: ZoomPluginOptions = {
 
 @Injectable()
 export class GanttBarsService {
-  private readonly itemsList$: Observable<GanttItem[] | null> =
+  private readonly itemsList$: Observable<GanttModel.InputDataItem[] | null> =
     this.ganttStateService.itemsList$;
   private readonly count$: Observable<number | null> =
     this.ganttStateService.count$;
@@ -150,20 +147,11 @@ export class GanttBarsService {
       if (chart === null) {
         return;
       }
-      chart.pan({ x: 0, y: Math.sign(deltaY) * 42 });
+      chart.pan({ x: 0, y: Math.sign(deltaY) * 40 });
     });
   }
 
   public openToday(): void {
-    /**
-     * offset in timeUnits
-     */
-    // const positionInDays: number = getStartOffsetForTimeUnit(
-    //   this.currentTimeUnit
-    // );
-    /**
-     * offset in days
-     */
     this.setNewMinMax(GanttConfiguration.START_DAYS_OFFSET_FROM_TODAY);
   }
 
@@ -175,21 +163,31 @@ export class GanttBarsService {
     ]).subscribe(
       ([count, itemsList, canvas]: [
         number | null,
-        GanttItem[] | null,
+        GanttModel.InputDataItem[] | null,
         CanvasRenderingContext2D
       ]) => {
         if (itemsList === null || count === null) {
           return;
         }
-        const data: GanttModel.Data = this.getData(itemsList);
+        const data: GanttModel.Data = this.getData(itemsList, count);
         const type: GanttModel.Type = 'line';
         const plugins: GanttModel.Plugin[] = [
           CHART_BACKGROUND_COLOR_PLUGIN,
-          GANTT_DATA_PLUGIN,
+          // GANTT_DATA_PLUGIN,
           TIMELINE_LABELS_PLUGIN,
           TODAY_LINE_PLUGIN,
         ];
         const options: GanttModel.Options = {
+          elements: {
+            bar: {
+              borderWidth: GanttConfiguration.ITEM_PADDING_PX,
+              borderSkipped: false,
+              borderColor: 'transparent',
+              borderRadius:
+                GanttConfiguration.ITEM_BORDER_RADIUS_PX +
+                GanttConfiguration.ITEM_PADDING_PX,
+            },
+          },
           animation: ANIMATION_OPTIONS,
           responsive: true,
           maintainAspectRatio: false,
@@ -256,66 +254,25 @@ export class GanttBarsService {
     );
   }
 
-  private getData(itemsList: GanttItem[]): GanttModel.Data {
-    const dataList: GanttModel.DataList = [];
-    itemsList.forEach((item: GanttItem) => {
-      const colorValue: string =
-        GanttStatusColor[item.status] ?? GanttStatusColor[GanttStatus.Default];
-      dataList.push(item.value);
-    });
-    // const datasetList: ChartJs.ChartDataset<'bar', GanttModel.DataUnit[]>[] =
-    //   dataList.map((data, index) => {
-    //     const dataset: ChartJs.ChartDataset<'bar', GanttModel.DataUnit[]> = {
-    //       type: 'bar',
-    //       borderWidth: 6,
-    //       borderColor: 'transparent',
-    //       borderSkipped: false,
-    //       borderRadius: 8,
-    //       barThickness: 40,
-    //       // barPercentage: 1,
-    //       // base: data,
-    //       // clip: true,
-    //       // categoryPercentage: 1,
-    //       backgroundColor: 'transparent',
-    //       // GanttStatusColor[
-    //       //   Array.from(Object.values(GanttStatus))[
-    //       //     Math.floor(Math.random() * 3)
-    //       //   ]
-    //       // ],
-    //       data: [
-    //         [0, 1],
-    //         ...new Array(dataList.length)
-    //           .fill(null)
-    //           .map((v, i) => (i === index ? data : null)),
-    //       ],
-    //     };
-    //     return dataset;
-    //   });
-    // const singleDataSet: ChartJs.ChartDataset<'bar', GanttModel.DataUnit[]> = {
-    //   type: 'bar',
-    //   borderWidth: 6,
-    //   borderSkipped: false,
-    //   borderRadius: 8,
-    //   barThickness: 40,
-    //   xAxisID: 'GanttTimeScale',
-    //   yAxisID: 'GanttListScale',
-    //   backgroundColor:
-    //     GanttStatusColor[
-    //       Array.from(Object.values(GanttStatus))[Math.floor(Math.random() * 3)]
-    //     ],
-    //   data: dataList,
-    // };
+  private getData(
+    inputList: GanttModel.InputDataItem[],
+    count: number
+  ): GanttModel.Data {
+    const type: GanttModel.Type = 'bar';
+    const datasets: GanttModel.Dataset[] = inputList.map(
+      (inputItem: GanttModel.InputDataItem) => {
+        const dataset: GanttModel.Dataset = {
+          type,
+          barThickness: GanttConfiguration.ITEM_HEIGHT_PX,
+          backgroundColor: GanttStatusColor[inputItem.status],
+          data: [inputItem.value],
+        };
+        return dataset;
+      }
+    );
     return {
-      datasets: [
-        {
-          // type: 'bar',
-          hidden: true,
-          // xAxisID: 'invisible',
-          // yAxisID: 'invisible',
-          data: dataList,
-        },
-      ],
-      labels: new Array(dataList.length).fill(''),
+      datasets,
+      labels: new Array(1).fill(''),
     };
   }
 

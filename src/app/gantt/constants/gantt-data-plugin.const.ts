@@ -1,13 +1,9 @@
 import { Chart, Plugin, Scale } from 'chart.js';
 import { GanttStatus } from '../declarations/enums/gantt-status.enum';
+import { GanttConfiguration } from '../declarations/namespaces/gantt-configuration.namespace';
 import { GanttModel } from '../declarations/namespaces/gantt.namespace';
 import { drawSquare } from '../functions/draw-square.function';
 import { GanttStatusColor } from './gantt-status-color.const';
-
-const ITEM_HEIGHT: number = 40;
-const ITEM_PADDING: number = 6;
-const BORDER_RADIUS: number = 2;
-const MIN_WIDTH_PX: number = 8;
 
 export const GANTT_DATA_PLUGIN: Plugin = {
   id: 'GANTT_DATA_PLUGIN',
@@ -31,19 +27,25 @@ export const GANTT_DATA_PLUGIN: Plugin = {
       if (yPos < 0) {
         return;
       }
-      const widthPx: number = xEndPos - xStartPos - ITEM_PADDING;
+      const widthPx: number =
+        xEndPos - xStartPos - GanttConfiguration.ITEM_PADDING_PX;
       drawSquare(
         ctx,
         {
-          top: yPos + ITEM_PADDING,
-          left: xStartPos + ITEM_PADDING,
-          height: ITEM_HEIGHT - ITEM_PADDING * 2,
-          width: widthPx <= MIN_WIDTH_PX ? MIN_WIDTH_PX : widthPx,
+          top: yPos + GanttConfiguration.ITEM_PADDING_PX,
+          left: xStartPos + GanttConfiguration.ITEM_PADDING_PX,
+          height:
+            GanttConfiguration.ITEM_HEIGHT_PX -
+            GanttConfiguration.ITEM_PADDING_PX * 2,
+          width:
+            widthPx <= GanttConfiguration.ITEM_MIN_WIDTH_PX
+              ? GanttConfiguration.ITEM_MIN_WIDTH_PX
+              : widthPx,
         },
         GanttStatusColor[
           Array.from(Object.values(GanttStatus))[Math.floor(index / 3)]
         ],
-        BORDER_RADIUS
+        GanttConfiguration.ITEM_BORDER_RADIUS_PX
       );
     });
   },
