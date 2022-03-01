@@ -8,10 +8,10 @@ import {
 } from 'rxjs';
 import { GanttItem } from '../declarations/interfaces/gantt-item.interface';
 import { GanttSize } from '../declarations/interfaces/gantt-size.interface';
+import { GanttConfiguration } from '../declarations/namespaces/gantt-configuration.namespace';
 
 @Injectable()
 export class GanttStateService {
-  public readonly paddingSizePx: number = 6;
   public readonly rowHeightPx: number = 40;
   private readonly countState: BehaviorSubject<number | null> =
     new BehaviorSubject<number | null>(null);
@@ -57,11 +57,11 @@ export class GanttStateService {
       };
     }
     const heightPx: number =
-      this.rowHeightPx * count + 40 + count * (this.paddingSizePx + 1);
+      (this.rowHeightPx + 2) * count + GanttConfiguration.DEFAULT_TITLE_SIZE;
     const edgesList: number[] = itemsList.map(
       (item: GanttItem) => item.value[1]
     );
-    const widthPx: number = Math.max(...edgesList) + this.paddingSizePx * 2;
+    const widthPx: number = Math.max(...edgesList);
     return {
       height: heightPx,
       width: widthPx,

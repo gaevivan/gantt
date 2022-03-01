@@ -11,11 +11,15 @@ import { GANTT_DATA_PLUGIN } from '../constants/gantt-data-plugin.const';
 import { GanttStatusColor } from '../constants/gantt-status-color.const';
 import { TIMELINE_LABELS_PLUGIN } from '../constants/timeline-labels-plugin.const';
 import { TODAY_LINE_PLUGIN } from '../constants/today-line-plugin.const';
+import { GanttDate } from '../declarations/classes/gantt-date.class';
 import { GanttListScale } from '../declarations/classes/gantt-list-scale.class';
 import { GanttTimeScale } from '../declarations/classes/gantt-time-scale.class';
 import { GanttStatus } from '../declarations/enums/gantt-status.enum';
 import { GanttItem } from '../declarations/interfaces/gantt-item.interface';
+import { GanttConfiguration } from '../declarations/namespaces/gantt-configuration.namespace';
+import { GanttUtilities } from '../declarations/namespaces/gantt-utilities.namespace';
 import { GanttModel } from '../declarations/namespaces/gantt.namespace';
+import { GanttGridScaleOptions } from '../declarations/types/gantt-grid-scale-options.type';
 import { GanttStateService } from './gantt-state.service';
 
 ChartJs.Chart.register(
@@ -33,6 +37,62 @@ ChartJs.Chart.register(
   GanttListScale
 );
 
+const TIME_UNIT_KOEF_MAP: Map<ChartJs.TimeUnit, number> = new Map([
+  ['day', 1],
+  ['week', 7],
+]);
+
+const TIME_UNITS_LIST: ChartJs.TimeUnit[] = [
+  'day',
+  'week',
+  'month',
+  'quarter',
+  'year',
+];
+type GetMaxDateForTimeUnitFunction = (
+  minDate: Date,
+  ticksCount: number
+) => Date;
+
+function getMaxDateForDay(minDate: Date, ticksCount: number): Date {
+  const maxDate: Date = new Date(minDate);
+  maxDate.setDate(maxDate.getDate() + ticksCount);
+  return maxDate;
+}
+function getMaxDateForWeek(minDate: Date, ticksCount: number): Date {
+  const maxDate: Date = new Date(minDate);
+  maxDate.setDate(
+    maxDate.getDate() + ticksCount * GanttUtilities.DAYS_IN_A_WEEK
+  );
+  return maxDate;
+}
+function getMaxDateForMonth(minDate: Date, ticksCount: number): Date {
+  const maxDate: Date = new Date(minDate);
+  maxDate.setMonth(maxDate.getMonth() + ticksCount);
+  return maxDate;
+}
+function getMaxDateForQuarter(minDate: Date, ticksCount: number): Date {
+  const maxDate: Date = new Date(minDate);
+  maxDate.setMonth(
+    maxDate.getMonth() + ticksCount * GanttUtilities.MONTHS_IN_A_QUARTER
+  );
+  return maxDate;
+}
+function getMaxDateForYear(minDate: Date, ticksCount: number): Date {
+  const maxDate: Date = new Date(minDate);
+  maxDate.setFullYear(maxDate.getFullYear() + ticksCount);
+  return maxDate;
+}
+
+const CONVERT_BY_TYPE: Map<ChartJs.TimeUnit, GetMaxDateForTimeUnitFunction> =
+  new Map([
+    ['day', getMaxDateForDay],
+    ['week', getMaxDateForWeek],
+    ['month', getMaxDateForMonth],
+    ['quarter', getMaxDateForQuarter],
+    ['year', getMaxDateForYear],
+  ]);
+
 const ANIMATION_OPTIONS: GanttModel.AnimationOptions = {
   duration: 0,
 };
@@ -45,6 +105,8 @@ const LEGEND_PLUGIN_OPTIONS: GanttModel.LegendOptions = {
 const ZOOM_PLUGIN_OPTIONS: ZoomPluginOptions = {
   pan: {
     enabled: true,
+    mode: 'xy',
+    overScaleMode: 'y',
   },
   zoom: {
     // onZoomStart: (zoomEvent) => GanttBarsService.onZoomStart(zoomEvent),
@@ -54,7 +116,7 @@ const ZOOM_PLUGIN_OPTIONS: ZoomPluginOptions = {
     mode: 'x',
     wheel: {
       modifierKey: 'alt',
-      enabled: true,
+      enabled: false,
     },
     pinch: {
       enabled: true,
@@ -73,54 +135,36 @@ export class GanttBarsService {
     this.ganttStateService.canvas$;
   private readonly chart$: BehaviorSubject<GanttModel.Chart | null> =
     new BehaviorSubject<GanttModel.Chart | null>(null);
-  private currentTimeUnit: ChartJs.TimeUnit = 'day';
+  private currentTimeUnit: ChartJs.TimeUnit =
+    GanttConfiguration.START_TIME_UNIT;
 
   constructor(private readonly ganttStateService: GanttStateService) {}
 
   public setTimeUnit(timeUnit: ChartJs.TimeUnit): void {
-    combineLatest([this.chart$.pipe(take(1))]).subscribe(
-      ([chart]: [GanttModel.Chart | null]) => {
-        if (timeUnit === this.currentTimeUnit) {
-          return;
-        }
-        if (chart === null) {
-          return;
-        }
-        const scales = chart.options.scales;
-        if (scales === undefined) {
-          return;
-        }
-        const x = scales['x'];
-        if (x === undefined) {
-          return;
-        }
-        const max = x.max;
-        if (max === undefined) {
-          return;
-        }
-        x.max = max + 49;
-        chart.update();
-      }
-    );
+    this.currentTimeUnit = timeUnit;
+    this.setNewMinMax();
   }
 
-  public openToday(): void {
+  public scrollByDeltaY(deltaY: number): void {
     this.chart$.pipe(take(1)).subscribe((chart: GanttModel.Chart | null) => {
       if (chart === null) {
         return;
       }
-      if (
-        chart.options.scales === undefined ||
-        chart.options.scales['x'] === undefined
-      ) {
-        return;
-      }
-      const xScale: DeepPartial<ChartJs.CartesianScaleOptions> =
-        chart.options.scales['x'];
-      xScale.min = GanttTimeScale.daysFromToday;
-      xScale.max = 7 + GanttTimeScale.daysFromToday;
-      chart.update();
+      chart.pan({ x: 0, y: Math.sign(deltaY) * 42 });
     });
+  }
+
+  public openToday(): void {
+    /**
+     * offset in timeUnits
+     */
+    // const positionInDays: number = getStartOffsetForTimeUnit(
+    //   this.currentTimeUnit
+    // );
+    /**
+     * offset in days
+     */
+    this.setNewMinMax(GanttConfiguration.START_DAYS_OFFSET_FROM_TODAY);
   }
 
   public draw(): void {
@@ -150,14 +194,23 @@ export class GanttBarsService {
           responsive: true,
           maintainAspectRatio: false,
           indexAxis: 'y',
+          layout: {
+            autoPadding: false,
+          },
           plugins: {
             tooltip: TOOLTIP_PLUGIN_OPTIONS,
-            zoom: ZOOM_PLUGIN_OPTIONS,
+            zoom: {
+              ...ZOOM_PLUGIN_OPTIONS,
+              zoom: {
+                ...ZOOM_PLUGIN_OPTIONS.zoom,
+                onZoomStart: this.onZoomStart.bind(this),
+              },
+            },
             legend: LEGEND_PLUGIN_OPTIONS,
           },
           scales: {
-            x: GanttTimeScale.getDefaultOptions(7),
-            y: GanttListScale.getDefaultOptions(count),
+            x: GanttTimeScale.getDefaultOptions(8) as any,
+            y: GanttListScale.getDefaultOptions(count) as any,
           },
         };
         const config: GanttModel.Configuration = {
@@ -168,6 +221,37 @@ export class GanttBarsService {
         };
         const chart: GanttModel.Chart = new GanttModel.Chart(canvas, config);
         this.chart$.next(chart);
+        this.openToday();
+      }
+    );
+  }
+
+  private setNewMinMax(min: number | null = null): void {
+    combineLatest([this.chart$.pipe(take(1))]).subscribe(
+      ([chart]: [GanttModel.Chart | null]) => {
+        if (chart === null) {
+          return;
+        }
+        if (
+          chart.options.scales === undefined ||
+          chart.options.scales['x'] === undefined
+        ) {
+          return;
+        }
+        const xScale: DeepPartial<GanttGridScaleOptions> = chart.options.scales[
+          'x'
+        ] as any;
+        xScale.timeUnit = this.currentTimeUnit;
+        if (min !== null) {
+          xScale.min = min;
+        }
+        const count: number = 8;
+        const minDate: Date = new GanttDate(xScale.min).getDate();
+        const convertFunc: GetMaxDateForTimeUnitFunction =
+          CONVERT_BY_TYPE.get(this.currentTimeUnit) ?? (() => minDate);
+        const max: Date = convertFunc(minDate, count);
+        xScale.max = GanttDate.dateToDays(max) - GanttDate.getToday();
+        chart.update();
       }
     );
   }
@@ -235,28 +319,40 @@ export class GanttBarsService {
     };
   }
 
-  // public static onZoomStart(zoomEvent: {
-  //   chart: Chart;
-  //   event: Event;
-  // }): boolean {
-  //   const timeScale: TimeScale = zoomEvent.chart.scales['x'] as TimeScale;
-  //   const wheelEvent: WheelEvent = zoomEvent.event as WheelEvent;
-  //   const isZoomUp: boolean = wheelEvent.deltaY > 0;
-  //   const zoomLevel: number = zoomEvent.chart.getZoomLevel();
-  //   const currentUnit: TimeUnit | false = timeScale.options.time.unit;
-  //   if (currentUnit === false) {
-  //     return false;
-  //   }
-  //   const zoomRange: ZoomRange | undefined =
-  //     UNIT_TO_ZOOM_RANGE.get(currentUnit);
-  //   if (zoomRange === undefined) {
-  //     return false;
-  //   }
-  //   const isMax: boolean = !isZoomUp && zoomLevel > zoomRange.max;
-  //   const isMin: boolean = isZoomUp && zoomLevel < zoomRange.min;
-  //   if (isMax || isMin) {
-  //     return false;
-  //   }
-  //   return true;
-  // }
+  private onZoomStart(zoomEvent: {
+    chart: ChartJs.Chart;
+    event: Event;
+  }): boolean {
+    // const timeScale: TimeScale = zoomEvent.chart.scales['x'] as TimeScale;
+    const wheelEvent: WheelEvent = zoomEvent.event as WheelEvent;
+    const isZoomUp: boolean = wheelEvent.deltaY > 0;
+    const currentIndex: number = TIME_UNITS_LIST.indexOf(this.currentTimeUnit);
+    const isMax: boolean = currentIndex === TIME_UNITS_LIST.length - 1;
+    const isMin: boolean = currentIndex === 0;
+    if (isMax && isZoomUp) {
+      return false;
+    }
+    if (isMin && !isZoomUp) {
+      return false;
+    }
+    const newIndex: number = isZoomUp ? currentIndex + 1 : currentIndex - 1;
+    this.setTimeUnit(TIME_UNITS_LIST[newIndex]);
+    return false;
+    // const zoomLevel: number = zoomEvent.chart.getZoomLevel();
+    // const currentUnit: TimeUnit | false = timeScale.options.time.unit;
+    // if (currentUnit === false) {
+    //   return false;
+    // }
+    // const zoomRange: ZoomRange | undefined =
+    //   UNIT_TO_ZOOM_RANGE.get(currentUnit);
+    // if (zoomRange === undefined) {
+    //   return false;
+    // }
+    // const isMax: boolean = !isZoomUp && zoomLevel > zoomRange.max;
+    // const isMin: boolean = isZoomUp && zoomLevel < zoomRange.min;
+    // if (isMax || isMin) {
+    //   return false;
+    // }
+    // return true;
+  }
 }

@@ -1,5 +1,6 @@
-import { Chart, Plugin, Scale, Tick } from 'chart.js';
+import { Chart, Plugin, Tick } from 'chart.js';
 import { GanttDate } from '../declarations/classes/gantt-date.class';
+import { GanttTimeScale } from '../declarations/classes/gantt-time-scale.class';
 
 const TEXT_HEIGHT: number = 10;
 const TIME_UNIT_COLOR: string = '#1D1C36';
@@ -9,6 +10,7 @@ const TEXT_SIZE: number = 10;
 const TIME_LINE_HEIGHT: number = 40;
 const BORDER_HEIGHT: number = 16;
 const DELIMITER_COLOR: string = 'rgba(0,0,0,0.1)';
+const ITEM_WIDTH: number = 155;
 
 export const TIMELINE_LABELS_PLUGIN: Plugin = {
   id: 'DATE_LABELS_PLUGIN',
@@ -17,7 +19,7 @@ export const TIMELINE_LABELS_PLUGIN: Plugin = {
     if (ctx === null) {
       return;
     }
-    const xAxis = chart.scales['x'];
+    const xAxis: GanttTimeScale = chart.scales['x'] as any;
     ctx.save();
     ctx.beginPath();
     ctx.textBaseline = 'top';
@@ -25,10 +27,10 @@ export const TIMELINE_LABELS_PLUGIN: Plugin = {
     ctx.strokeStyle = DELIMITER_COLOR;
     ctx.lineWidth = 1;
     xAxis.ticks.forEach((tick: Tick, index: number) => {
-      if (index === 0) {
-        drawTick(ctx, xAxis, tick.value - 1);
-      }
-      drawTick(ctx, xAxis, Number(tick.value));
+      // if (index === 0) {
+      //   drawTick(ctx, xAxis, tick.value - 1);
+      // }
+      drawTick(ctx, xAxis, tick);
     });
     ctx.stroke();
     ctx.restore();
@@ -37,26 +39,47 @@ export const TIMELINE_LABELS_PLUGIN: Plugin = {
 
 function drawTick(
   ctx: CanvasRenderingContext2D,
-  xAxis: Scale,
-  tickValue: number
+  xAxis: GanttTimeScale,
+  tick: Tick
 ): void {
-  const numberTickValue: number = Number(tickValue.toFixed(0));
-  const date: GanttDate = new GanttDate(numberTickValue);
+  const numberTickValue: number = Number(tick.value);
+  const dateTickValue: GanttDate = new GanttDate(numberTickValue);
+  const tickDateLabel: string = xAxis.getLabelForValue(numberTickValue);
+  const tickYearLabel: string = dateTickValue.getYearTimeUnitString();
   ctx.font = `bold ${TEXT_SIZE}px Helvetica`;
   ctx.fillStyle = TIME_UNIT_COLOR;
-  const xPos: number = xAxis.getPixelForValue(tickValue);
-  const width: number = Math.floor(
-    xPos - xAxis.getPixelForValue(tickValue - 1)
+  const tickLeftPosition: number = xAxis.getPixelForValue(numberTickValue);
+  const tickIndex: number = xAxis.ticks.indexOf(tick);
+  const nextTickIndex: Tick = xAxis.ticks[tickIndex + 1];
+  const prevTickIndex = xAxis.ticks[tickIndex - 1];
+  const isLastTick: boolean = nextTickIndex === undefined;
+  const nextTickLeftPosition: number = xAxis.getPixelForValue(
+    nextTickIndex?.value
   );
+  const prevTickLeftPosition: number = xAxis.getPixelForValue(
+    prevTickIndex?.value
+  );
+  const tickWidth: number = isLastTick
+    ? tickLeftPosition - prevTickLeftPosition
+    : nextTickLeftPosition - tickLeftPosition;
   const yPadding: number = (TIME_LINE_HEIGHT - BORDER_HEIGHT) / 2;
-  ctx.moveTo(xPos + width, yPadding);
-  ctx.lineTo(xPos + width, yPadding + BORDER_HEIGHT);
-  ctx.fillText(date.getDateWithLocale(), xPos + width / 2, TEXT_PADDING * 2);
+  ctx.moveTo(tickLeftPosition + tickWidth, yPadding);
+  ctx.lineTo(tickLeftPosition + tickWidth, yPadding + BORDER_HEIGHT);
+  if (tickYearLabel === tickDateLabel) {
+    const yearPadding: number = (TIME_LINE_HEIGHT - TEXT_HEIGHT) / 2;
+    ctx.fillText(tickDateLabel, tickLeftPosition + tickWidth / 2, yearPadding);
+    return;
+  }
+  ctx.fillText(
+    tickDateLabel,
+    tickLeftPosition + tickWidth / 2,
+    TEXT_PADDING * 2
+  );
   ctx.font = `400 ${TEXT_SIZE}px Helvetica`;
   ctx.fillStyle = YEAR_COLOR;
   ctx.fillText(
-    date.getYearAsString(),
-    xPos + width / 2,
+    tickYearLabel,
+    tickLeftPosition + tickWidth / 2,
     TEXT_PADDING * 3 + TEXT_HEIGHT
   );
 }

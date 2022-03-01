@@ -51,9 +51,10 @@ export class GanttComponent {
   }
 
   public onWheel(event: WheelEvent): void {
-    if (!event.altKey) {
+    if (event.ctrlKey) {
       return;
     }
+    this.ganttBarsService.scrollByDeltaY(event.deltaY);
     event.preventDefault();
   }
 

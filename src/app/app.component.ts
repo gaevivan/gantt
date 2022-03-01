@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { GanttDate } from './gantt/declarations/classes/gantt-date.class';
 import { GanttStatus } from './gantt/declarations/enums/gantt-status.enum';
 import { GanttItem } from './gantt/declarations/interfaces/gantt-item.interface';
 
@@ -10,21 +9,49 @@ import { GanttItem } from './gantt/declarations/interfaces/gantt-item.interface'
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
-  public readonly itemsList: GanttItem[] = new Array(10)
-    .fill(null)
-    .map((date: null, index: number) => {
-      const start: GanttDate = new GanttDate(Math.floor(Math.random() * 3) - 2);
-      const end: GanttDate = new GanttDate(Math.floor(Math.random() * 10) + 3);
-      return {
-        id: String(index),
-        value: [start.getDaysFromToday(), end.getDaysFromToday()],
-        status: Array.from(Object.values(GanttStatus))[
-          Math.floor(Math.random() * 3)
-        ],
-        start,
-        end,
-      };
-    });
+  // public readonly itemsList: GanttItem[] = new Array(10)
+  //   .fill(null)
+  //   .map((date: null, index: number) => {
+  //     const start: GanttDate = new GanttDate(Math.floor(Math.random() * 3) - 2);
+  //     const end: GanttDate = new GanttDate(Math.floor(Math.random() * 10) + 3);
+  //     return {
+  //       id: String(index),
+  //       value: [start.getDaysFromToday(), end.getDaysFromToday()],
+  //       status: Array.from(Object.values(GanttStatus))[
+  //         Math.floor(Math.random() * 3)
+  //       ],
+  //       start,
+  //       end,
+  //     };
+  //   });
+  public readonly itemsList: GanttItem[] = [
+    {
+      id: '1',
+      value: [0, 1],
+      status: GanttStatus.Default,
+    },
+    {
+      id: '2',
+      value: [2, 8],
+      status: GanttStatus.Default,
+    },
+    {
+      id: '3',
+      value: [9, 38],
+      status: GanttStatus.Default,
+    },
+    {
+      id: '4',
+      value: [39, 128],
+      status: GanttStatus.Default,
+    },
+    {
+      id: '4',
+      value: [129, 378],
+      status: GanttStatus.Default,
+    },
+  ];
+
   /**
    * [
     {

@@ -1,20 +1,21 @@
-import { LinearScaleOptions, TimeScale } from 'chart.js';
+import { LinearScale, LinearScaleOptions } from 'chart.js';
 import { DeepPartial } from 'chart.js/types/utils';
 
 type GanttGridScaleOptions = DeepPartial<LinearScaleOptions> & {
-  type: 'linear';
+  type: 'GanttGridScale';
 };
-const GRID_LINE_COLOR: string = '#EBEDEE';
-const TRANSPARENT_COLOR: string = 'transparent';
 
-export class GanttGridScale<T = GanttGridScaleOptions> extends TimeScale {
+export class GanttGridScale<T = GanttGridScaleOptions> extends LinearScale {
   public static override id: string = 'GanttGridScale';
 
   public static getDefaultOptions(
     ticksCount: number
   ): Partial<GanttGridScaleOptions> {
     return {
-      type: 'linear',
+      type: 'GanttGridScale',
+      afterFit: (scale: GanttGridScale) => {
+        scale.height = 40;
+      },
       grid: {
         display: true,
         drawBorder: false,
@@ -22,23 +23,23 @@ export class GanttGridScale<T = GanttGridScaleOptions> extends TimeScale {
         drawTicks: false,
         lineWidth: 1,
         borderDash: [3, 3],
-        color: GRID_LINE_COLOR,
+        borderWidth: 1,
       },
       alignToPixels: true,
       bounds: 'ticks',
       position: 'top',
       ticks: {
+        stepSize: 1,
         display: false,
         maxRotation: 0,
         includeBounds: false,
-        autoSkip: true,
+        autoSkip: false,
         autoSkipPadding: 0,
         callback: (tickValue: number | string) => {
-          const numberValue: number = Number(Number(tickValue).toFixed(0));
+          const numberValue: number = Number(tickValue);
           return numberValue;
         },
-        precision: 0,
-        maxTicksLimit: ticksCount + 2,
+        maxTicksLimit: ticksCount + 3,
       },
     };
   }

@@ -9,13 +9,12 @@ const TIMELINE_HEIGHT: number = 40;
 export class GanttListScale extends GanttGridScale {
   public static override id: string = 'GanttListScale';
 
-  public static override getDefaultOptions(
-    ticksCount: number
-  ): Partial<GanttGridScaleOptions> {
+  public static override getDefaultOptions(ticksCount: number): any {
     const defaultOptions: Partial<GanttGridScaleOptions> =
       GanttGridScale.getDefaultOptions(ticksCount);
     return {
       ...defaultOptions,
+      type: 'GanttGridScale',
       grid: {
         ...defaultOptions.grid,
         color: ({ tick, scale }: ScriptableScaleContext) => {

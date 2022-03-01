@@ -1,4 +1,6 @@
+import { MONTH_LIST } from '../../constants/month-list.const';
 import { RELATIVE_MONTH_LIST } from '../../constants/relative-month-list.const';
+import { GanttUtilities } from '../namespaces/gantt-utilities.namespace';
 
 export class GanttDate {
   private days: number;
@@ -8,10 +10,36 @@ export class GanttDate {
     this.date = GanttDate.daysToDate(this.days);
   }
 
-  public getDateWithLocale(): string {
+  public getDayTimeUnitString(): string {
     return `${this.date.getDate()} ${
-      RELATIVE_MONTH_LIST[this.date.getMonth() - 1]
+      RELATIVE_MONTH_LIST[this.date.getMonth()]
     }`;
+  }
+
+  public getWeekTimeUnitString(): string {
+    const nextDate: Date = new GanttDate(
+      this.days - GanttDate.getToday() + GanttUtilities.DAYS_IN_A_WEEK - 1
+    ).getDate();
+    return `${this.date.getDate()} - ${nextDate.getDate()} ${
+      RELATIVE_MONTH_LIST[nextDate.getMonth()]
+    }`;
+  }
+
+  public getMonthTimeUnitString(): string {
+    return `${MONTH_LIST[this.date.getMonth()]}`;
+  }
+
+  public getQuarterTimeUnitString(): string {
+    const monthIndex: number = this.date.getMonth();
+    const quarter: number = Math.round(
+      monthIndex / GanttUtilities.MONTHS_IN_A_QUARTER
+    );
+    return `Q${quarter + 1}`;
+  }
+
+  public setMonth(month: number): void {
+    this.date.setMonth(month);
+    this.days = GanttDate.dateToDays(this.date) - GanttDate.getToday();
   }
 
   public getDate(): Date {
@@ -34,7 +62,7 @@ export class GanttDate {
     return this.date.toISOString();
   }
 
-  public getYearAsString(): string {
+  public getYearTimeUnitString(): string {
     return this.date.getFullYear().toString();
   }
 
@@ -57,16 +85,14 @@ export class GanttDate {
   }
 
   public static getToday(): number {
-    return Math.floor(new Date().getTime() / DAY_IN_MS);
+    return Math.floor(new Date().getTime() / GanttUtilities.DAY_IN_MS);
   }
 
   public static dateToDays(date: Date): number {
-    return Math.floor(date.getTime() / DAY_IN_MS);
+    return Math.floor(date.getTime() / GanttUtilities.DAY_IN_MS);
   }
 
   public static daysToDate(days: number): Date {
-    return new Date(days * DAY_IN_MS);
+    return new Date(days * GanttUtilities.DAY_IN_MS);
   }
 }
-
-const DAY_IN_MS: number = 1000 * 60 * 60 * 24;
